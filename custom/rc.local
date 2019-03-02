@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# wait for full system startup
+sleep 3
+
+# fix terminal setup
+export TERM=xterm
+
+# run each /etc/setup-*
+for script in $(ls -1 /etc/setup-*)
+do
+	# permissions
+	chmod +x $script
+
+	# execute 
+	openvt -s -w $script
+
+	# cleaning
+	rm $script
+done
+
+# delete this file
+>/etc/rc.local
+
+# restart to take effects
+reboot

@@ -1,0 +1,188 @@
+#
+# This will complete the installation automatically
+#
+# For d-i, it needs:
+# - Remove file=blah
+# - Add auto url=http://blah/preseed.cfg debconf/priority=critical locale=en_US console-setup/ask_detect=false
+#   console-setup/layoutcode=us netcfg/choose_interface=auto
+
+
+
+### d-i general stuff.
+d-i debconf/priority string critical
+d-i time/zone string Europe/Prague
+
+
+
+### Locales, keyboard, etc
+d-i debian-installer/locale string en_US
+d-i debian-installer/language string en
+d-i debian-installer/country string CZ
+d-i base-installer/kernel/headers   boolean false
+d-i console-setup/ask_detect boolean false
+d-i console-setup/layoutcode string cz
+d-i keyboard-configuration/ask_detect boolean false
+d-i keyboard-configuration/layoutcode string cz
+d-i keyboard-configuration/xkb-keymap select cz
+d-i keyboard-configuration/layout select Czech
+d-i keyboard-configuration/modelcode string pc105
+d-i keyboard-configuration/variantcode string
+
+
+
+### Networking
+#d-i netcfg/get_hostname string ubuntu
+d-i netcfg/hostname string think
+d-i netcfg/enable boolean true
+d-i netcfg/choose_interface select auto
+d-i netcfg/disable_dhcp boolean false
+
+
+### Package config
+#d-i mirror/http/hostname string archive.ubuntu.com
+#d-i mirror/http/proxy string http://10.7.31.189:3142/
+d-i debian-installer/allow_unauthenticated boolean false
+
+
+
+### Partitioning
+# Force umount it first
+d-i partman/early_command string \
+USBDEV=$(list-devices usb-partition | sed "s/\(.*\)./\1/");\
+BOOTDEV=$(list-devices disk | grep -v "$USBDEV" | head -1);\
+debconf-set partman-auto/disk $BOOTDEV;\
+debconf-set grub-installer/bootdev $BOOTDEV; \
+umount /media;
+
+# fix annoying question "write changes ...?"
+d-i partman-lvm/confirm_nooverwrite boolean true 
+d-i partman/choose_partition select finish
+d-i partman-md/confirm boolean true
+d-i partman-partitioning/confirm_write_new_label boolean true    
+d-i partman-basicfilesystems/no_swap boolean false
+d-i partman/unmount_active boolean true
+d-i partman-crypto/passphrase password ubuntu
+d-i partman-crypto/passphrase-again password ubuntu
+d-i partman-crypto/weak_passphrase boolean true
+d-i partman-auto/method string crypto
+d-i partman-lvm/device_remove_lvm boolean true
+d-i partman-lvm/confirm boolean true
+d-i partman-auto-lvm/guided_size string max
+d-i partman-auto/purge_lvm_from_device  boolean true
+d-i partman-auto-lvm/new_vg_name string crypt
+d-i partman-auto/disk string /dev/sda
+d-i grub-installer/bootdev string /dev/sda
+d-i partman-auto/choose_recipe select root-encrypted
+d-i partman-auto/expert_recipe string                         \
+      root-encrypted ::                                       \
+              500 1000 1000 ext4                                \
+                      $primary{ } $bootable{ }                \
+                      method{ format } format{ }              \
+                      use_filesystem{ } filesystem{ ext4 }    \
+                      mountpoint{ /boot }                     \
+              .                                               \
+              500 10000 1000000000 btrfs                      \
+                      $lvmok{ } lv_name{ root }               \
+                      in_vg { crypt }                         \
+                      $primary{ }                             \
+                      method{ format } format{ }              \
+                      use_filesystem{ } filesystem{ btrfs }   \
+                      mountpoint{ / }                         \
+              .
+#              .						      \
+#	      4096 8192 200% linux-swap $lvmok{ }             \
+#       	      lv_name{ swap }                                 \
+#              in_vg { crypt }                                 \
+#              method{ swap }                                  \
+#              format{ }                                       \
+#              .
+
+d-i partman-md/device_remove_md boolean true
+d-i partman-basicfilesystems/no_mount_point boolean false
+d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+
+
+
+### Accounts
+d-i user-setup/allow-password-weak boolean true
+d-i passwd/auto-login boolean false
+#d-i passwd/root-login boolean true
+#d-i passwd/make-user boolean false
+#d-i passwd/root-password password root
+#d-i passwd/root-password-again password root
+d-i passwd/user-fullname string kfiala
+d-i passwd/username string kfiala
+d-i passwd/user-password password ubuntu
+d-i passwd/user-password-again password ubuntu
+
+
+
+### Keyboard Setup
+d-i console-setup/ask_detect boolean false
+d-i keyboard-configuration/xkb-keymap select cz
+d-i keyboard-configuration/layoutcode string cz
+
+
+
+### Clock and time zone setup
+d-i clock-setup/ntp boolean true
+d-i clock-setup/ntp-server string tik.cesnet.cz
+d-i clock-setup/utc boolean false
+d-i time/zone string Europe/Prague
+
+
+
+### Grub
+d-i grub-installer/only_debian boolean true
+d-i grub-installer/with_other_os boolean true
+d-i grub-installer/timeout string 2
+
+
+
+### Apt setup
+#d-i apt-setup/multiverse boolean false
+#d-i apt-setup/universe boolean false
+#d-i apt-setup/backports boolean false
+#d-i apt-setup/updates boolean false
+#d-i apt-setup/non-free boolean false
+#d-i apt-setup/contrib boolean false
+d-i base-installer/install-recommends boolean false
+d-i pkgsel/update-policy select unattended-upgrades
+d-i user-setup/encrypt-home boolean false
+tasksel tasksel/skip-tasks  string standard
+#tasksel tasksel/first multiselect standard
+d-i pkgsel/include string git
+d-i pkgsel/install-language-support boolean false
+d-i pkgsel/updatedb boolean false
+popularity-contest popularity-contest/participate boolean false
+# Allow non-free firmware
+d-i hw-detect/load_firmware boolean true
+
+
+
+### Post install weaks
+# No boot splash screen.
+d-i debian-installer/quiet boolean false
+d-i debian-installer/splash boolean false
+
+d-i preseed/late_command string \
+	in-target sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"/' /etc/default/grub && \
+	in-target apt-get purge plymouth-theme-ubuntu-text && \
+	in-target update-grub2 && \
+	in-target sed -i "s/defaults,subvol/user_subvol_rm_allowed,noatime,ssd,compress=lzo,commit=120,subvol/g" /etc/fstab && \
+	in-target sed -i "s/ALL$/NOPASSWD:ALL/" /etc/sudoers && \
+	cp /cdrom/custom/interfaces /target/etc/network/interfaces && \
+	cp /cdrom/custom/rc.local /target/etc/rc.local && \
+	cp /cdrom/custom/setup-* /target/etc/. && \
+	in-target chmod +x /etc/rc.local 
+
+# Avoid that last message about the install being complete.
+d-i prebaseconfig/reboot_in_progress  note
+d-i finish-install/reboot_in_progress note
+d-i finish-install/keep-consoles boolean false
+d-i cdrom-detect/eject boolean true
+d-i debian-installer/exit/halt  boolean false
+d-i debian-installer/exit/poweroff boolean false
