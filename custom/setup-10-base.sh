@@ -11,8 +11,8 @@ set -v
 # Get IP
 dhclient eth0
 
-# Recompress filesystem
-btrfs filesystem defragment -r -clzo /
+## Recompress filesystem
+#btrfs filesystem defragment -r -clzo /
 
 # Trim FS
 fstrim --verbose --all

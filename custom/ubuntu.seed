@@ -81,7 +81,7 @@ d-i partman-auto/expert_recipe string                         \
                       use_filesystem{ } filesystem{ ext4 }    \
                       mountpoint{ /boot }                     \
               .                                               \
-              500 10000 1000000000 btrfs                      \
+              500 10000 1000000000 ext4                      \
                       $lvmok{ } lv_name{ root }               \
                       in_vg { crypt }                         \
                       $primary{ }                             \
@@ -172,7 +172,7 @@ d-i preseed/late_command string \
 	in-target sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"/' /etc/default/grub && \
 	in-target apt-get purge plymouth-theme-ubuntu-text && \
 	in-target update-grub2 && \
-	in-target sed -i "s/defaults,subvol/user_subvol_rm_allowed,noatime,ssd,compress=lzo,commit=120,subvol/g" /etc/fstab && \
+	in-target sed -i "s/defaults/defaults,noatime/g" /etc/fstab && \
 	in-target sed -i "s/ALL$/NOPASSWD:ALL/" /etc/sudoers && \
 	cp /cdrom/custom/interfaces /target/etc/network/interfaces && \
 	cp /cdrom/custom/rc.local /target/etc/rc.local && \
