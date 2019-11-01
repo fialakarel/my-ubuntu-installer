@@ -6,7 +6,7 @@ loc=$(dirname "$(readlink -f "$0")")
 cur=$(pwd)
 perm="$(id -u):$(id -g)"
 iso="/tmp/ubuntu.iso"
-version="18.10"
+version="19.10"
 srcdir=$(mktemp -d)
 dstdir=$(mktemp -d)
 
