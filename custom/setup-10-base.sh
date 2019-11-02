@@ -9,7 +9,20 @@ set -v
 ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 # Get IP
-dhclient eth0
+# Template for netplan
+cat >/etc/netplan/01-netcfg.yaml <<EOF
+# This file describes the network interfaces available on your system
+# For more information, see netplan(5).
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      dhcp4: yes
+EOF
+
+# Activate networking
+netplan apply
 
 ## Recompress filesystem
 #btrfs filesystem defragment -r -clzo /

@@ -169,14 +169,13 @@ d-i debian-installer/quiet boolean false
 d-i debian-installer/splash boolean false
 
 d-i preseed/late_command string \
-	in-target sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"/' /etc/default/grub && \
-	in-target apt-get purge plymouth-theme-ubuntu-text && \
-	in-target update-grub2 && \
-	in-target sed -i "s/defaults/defaults,noatime/g" /etc/fstab && \
-	in-target sed -i "s/ALL$/NOPASSWD:ALL/" /etc/sudoers && \
-	cp /cdrom/custom/interfaces /target/etc/network/interfaces && \
-	cp /cdrom/custom/rc.local /target/etc/rc.local && \
-	cp /cdrom/custom/setup-* /target/etc/. && \
+	in-target sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"/' /etc/default/grub ; \
+	in-target apt-get purge plymouth-theme-ubuntu-text ; \
+	in-target update-grub2 ; \
+	in-target sed -i "s/defaults/defaults,noatime/g" /etc/fstab ; \
+	in-target sed -i "s/ALL$/NOPASSWD:ALL/" /etc/sudoers ; \
+	cp /cdrom/custom/rc.local /target/etc/rc.local ; \
+	cp /cdrom/custom/setup-* /target/etc/. ; \
 	in-target chmod +x /etc/rc.local 
 
 # Avoid that last message about the install being complete.
