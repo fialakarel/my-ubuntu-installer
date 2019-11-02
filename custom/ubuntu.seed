@@ -86,7 +86,7 @@ d-i partman-auto/expert_recipe string                         \
                       in_vg { crypt }                         \
                       $primary{ }                             \
                       method{ format } format{ }              \
-                      use_filesystem{ } filesystem{ btrfs }   \
+                      use_filesystem{ } filesystem{ ext4 }   \
                       mountpoint{ / }                         \
               .
 #              .						      \
