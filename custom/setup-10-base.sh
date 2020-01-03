@@ -24,6 +24,9 @@ EOF
 # Activate networking
 netplan apply
 
+# Wait for a network
+sleep 5
+
 ## Recompress filesystem
 #btrfs filesystem defragment -r -clzo /
 
